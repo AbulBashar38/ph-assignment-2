@@ -6,6 +6,7 @@ import express, {
 } from "express";
 import { authRoute } from "./modules/auth/auth.route.js";
 import { issueRoute } from "./modules/issue/issue.route.js";
+import globalErrorHandler from "./middleware/globalErrorHandler.js";
 
 const app: Application = express();
 
@@ -20,5 +21,5 @@ app.get("/", (req: Request, res: Response) => {
     message: "DevPulse Server is running",
   });
 });
-
+app.use(globalErrorHandler);
 export default app;
