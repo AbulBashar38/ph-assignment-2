@@ -42,6 +42,13 @@ export interface IReporterInfo {
   role: string;
 }
 
+export interface ICreateIssuePayload {
+  title: string;
+  description: string;
+  type: ISSUE_TYPE;
+  reporter_id: number;
+}
+
 export interface IIssueWithReporter extends Omit<IIssue, "reporter_id"> {
   reporter: IReporterInfo;
 }

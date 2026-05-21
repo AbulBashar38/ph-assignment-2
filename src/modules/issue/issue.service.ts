@@ -3,18 +3,14 @@ import {
   ISSUE_STATUS,
   ISSUE_TYPE,
   SORT_OPTION,
+  type ICreateIssuePayload,
   type IGetAllIssuesQuery,
   type IIssue,
   type IIssueWithReporter,
   type IReporterInfo,
 } from "./issue.interface.js";
 
-const createIssueIntoDB = async (payload: {
-  title: string;
-  description: string;
-  type: ISSUE_TYPE;
-  reporter_id: number;
-}) => {
+const createIssueIntoDB = async (payload: ICreateIssuePayload) => {
   const { title, description, type, reporter_id } = payload;
 
   const result = await pool.query(
