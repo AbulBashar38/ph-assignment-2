@@ -57,7 +57,72 @@ const getAllIssues = async (req: Request, res: Response) => {
   }
 };
 
+const getSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const issue = await issueService.getSingleIssueFromDB(Number(id));
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue retrieved successfully",
+      data: issue,
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: 404,
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const updateIssue = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = req.user as { id: number; role: string };
+
+    const issue = await issueService.updateIssueIntoDB(Number(id), req.body, user);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue updated successfully",
+      data: issue,
+    });
+  } catch (error: any) {
+    const statusCode = error.message === "Issue not found" ? 404 : 403;
+    sendResponse(res, {
+      statusCode,
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const deleteIssue = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await issueService.deleteIssueIntoDB(Number(id));
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      statusCode: error.message === "Issue not found" ? 404 : 500,
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const issueController = {
   createIssue,
   getAllIssues,
+  getSingleIssue,
+  updateIssue,
+  deleteIssue,
 };
