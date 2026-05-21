@@ -185,6 +185,17 @@ const updateIssueIntoDB = async (
     }
   }
 
+
+  if (
+    payload.type !== undefined &&
+    payload.type !== ISSUE_TYPE.bug &&
+    payload.type !== ISSUE_TYPE.feature_request
+  ) {
+    throw new Error(
+      `Invalid type value. Must be '${ISSUE_TYPE.bug}' or '${ISSUE_TYPE.feature_request}'`,
+    );
+  }
+
   const result = await pool.query(
     `UPDATE issues 
      SET 
@@ -194,7 +205,12 @@ const updateIssueIntoDB = async (
        updated_at = NOW() 
      WHERE id = $4 
      RETURNING *`,
-    [payload.title ?? null, payload.description ?? null, payload.type ?? null, id],
+    [
+      payload.title ?? null,
+      payload.description ?? null,
+      payload.type ?? null,
+      id,
+    ],
   );
 
   return result.rows[0];
