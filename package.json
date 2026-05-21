@@ -21,16 +21,8 @@
     "url": "https://github.com/AbulBashar38/ph-assignment-2/issues"
   },
   "homepage": "https://github.com/AbulBashar38/ph-assignment-2#readme",
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.9.1",
-    "@types/pg": "^8.20.0",
-    "tsx": "^4.22.0",
-    "typescript": "5.8"
-  },
   "dependencies": {
+    "@types/node": "^25.9.1",
     "bcrypt-ts": "^8.0.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -38,5 +30,13 @@
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "tsup": "^8.5.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.20.0",
+    "tsx": "^4.22.0",
+    "typescript": "5.8"
   }
 }
