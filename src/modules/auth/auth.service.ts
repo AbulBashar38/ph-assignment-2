@@ -2,7 +2,7 @@ import { compare, hash } from "bcrypt-ts";
 import jwt from "jsonwebtoken";
 import config from "../../config/index.js";
 import { pool } from "../../db/index.js";
-import type { ILoginPayload, ISignupPayload } from "../../types/index.js";
+import type { ILoginPayload, ISignupPayload } from "./auth.interface.js";
 
 const registerUserIntoDB = async (payload: ISignupPayload) => {
   const { name, email, password, role } = payload;
