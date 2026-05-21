@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/AbulBashar38/ph-assignment-2#readme",
   "dependencies": {
-    "@types/node": "^25.9.1",
     "bcrypt-ts": "^8.0.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -35,6 +34,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.12.4",
     "@types/pg": "^8.20.0",
     "tsx": "^4.22.0",
     "typescript": "5.8"
