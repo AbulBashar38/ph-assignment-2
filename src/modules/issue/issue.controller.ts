@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import sendResponse from "../../utility/sendResponse.js";
 import { issueService } from "./issue.service.js";
-import type { ISSUE_TYPE, ISSUE_STATUS } from "./issue.interface.js";
+import type { ISSUE_TYPE, ISSUE_STATUS, SORT_OPTION } from "./issue.interface.js";
 
 const createIssue = async (req: Request, res: Response) => {
   try {
@@ -36,7 +36,7 @@ const getAllIssues = async (req: Request, res: Response) => {
     const { sort, type, status } = req.query;
 
     const issues = await issueService.getAllIssuesFromDB({
-      sort: sort as "newest" | "oldest" | undefined,
+      sort: sort as SORT_OPTION | undefined,
       type: type as ISSUE_TYPE | undefined,
       status: status as ISSUE_STATUS | undefined,
     });
@@ -48,11 +48,11 @@ const getAllIssues = async (req: Request, res: Response) => {
       data: issues,
     });
   } catch (error: any) {
+    const statusCode = error.message.includes("Invalid") ? 400 : 500;
     sendResponse(res, {
-      statusCode: 500,
+      statusCode,
       success: false,
       message: error.message,
-      error: error,
     });
   }
 };

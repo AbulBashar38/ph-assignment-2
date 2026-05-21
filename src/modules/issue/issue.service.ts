@@ -1,11 +1,12 @@
 import { pool } from "../../db/index.js";
-import type {
-  IIssue,
-  ISSUE_TYPE,
+import {
   ISSUE_STATUS,
-  IGetAllIssuesQuery,
-  IReporterInfo,
-  IIssueWithReporter,
+  ISSUE_TYPE,
+  SORT_OPTION,
+  type IGetAllIssuesQuery,
+  type IIssue,
+  type IIssueWithReporter,
+  type IReporterInfo,
 } from "./issue.interface.js";
 
 const createIssueIntoDB = async (payload: {
@@ -27,9 +28,39 @@ const createIssueIntoDB = async (payload: {
 };
 
 const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
-  const { sort = "newest", type, status } = query;
+  const { sort, type, status } = query;
 
-  // Build WHERE clause dynamically
+  if (
+    sort !== undefined &&
+    sort !== SORT_OPTION.newest &&
+    sort !== SORT_OPTION.oldest
+  ) {
+    throw new Error(
+      `Invalid sort value. Must be '${SORT_OPTION.newest}' or '${SORT_OPTION.oldest}'`,
+    );
+  }
+
+  if (
+    type !== undefined &&
+    type !== ISSUE_TYPE.bug &&
+    type !== ISSUE_TYPE.feature_request
+  ) {
+    throw new Error(
+      `Invalid type value. Must be '${ISSUE_TYPE.bug}' or '${ISSUE_TYPE.feature_request}'`,
+    );
+  }
+
+  if (
+    status !== undefined &&
+    status !== ISSUE_STATUS.open &&
+    status !== ISSUE_STATUS.in_progress &&
+    status !== ISSUE_STATUS.resolved
+  ) {
+    throw new Error(
+      `Invalid status value. Must be '${ISSUE_STATUS.open}', '${ISSUE_STATUS.in_progress}', or '${ISSUE_STATUS.resolved}'`,
+    );
+  }
+
   const conditions: string[] = [];
   const values: any[] = [];
   let paramIndex = 1;
@@ -44,12 +75,11 @@ const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
     values.push(status);
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  // Determine order
-  const orderClause = sort === "oldest" ? "ASC" : "DESC";
+  const orderClause = sort === SORT_OPTION.oldest ? "ASC" : "DESC";
 
-  // Fetch issues
   const issuesResult = await pool.query(
     `SELECT * FROM issues ${whereClause} ORDER BY created_at ${orderClause}`,
     values,
@@ -59,7 +89,6 @@ const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
     return [];
   }
 
-  // Fetch reporters for all issues in one query
   const reporterIds = issuesResult.rows.map((issue) => issue.reporter_id);
   const uniqueIds = [...new Set(reporterIds)];
 
@@ -68,7 +97,6 @@ const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
     [uniqueIds],
   );
 
-  // Create a map of reporters by id
   const reportersMap = new Map<number, IReporterInfo>();
   reportersResult.rows.forEach((reporter) => {
     reportersMap.set(reporter.id, {
@@ -78,14 +106,17 @@ const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
     });
   });
 
-  // Map issues with their reporter info
   const issues: IIssueWithReporter[] = issuesResult.rows.map((issue) => ({
     id: issue.id,
     title: issue.title,
     description: issue.description,
     type: issue.type,
     status: issue.status,
-    reporter: reportersMap.get(issue.reporter_id) || { id: 0, name: "Unknown", role: "unknown" },
+    reporter: reportersMap.get(issue.reporter_id) || {
+      id: 0,
+      name: "Unknown",
+      role: "unknown",
+    },
     created_at: issue.created_at,
     updated_at: issue.updated_at,
   }));
@@ -93,8 +124,12 @@ const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
   return issues;
 };
 
-const getSingleIssueFromDB = async (id: number): Promise<IIssueWithReporter> => {
-  const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [id]);
+const getSingleIssueFromDB = async (
+  id: number,
+): Promise<IIssueWithReporter> => {
+  const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [
+    id,
+  ]);
 
   if (issueResult.rows.length === 0) {
     throw new Error("Issue not found");
@@ -140,7 +175,9 @@ const updateIssueIntoDB = async (
   user: IUserInfo,
 ): Promise<IIssue> => {
   // Fetch the issue first
-  const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [id]);
+  const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [
+    id,
+  ]);
 
   if (issueResult.rows.length === 0) {
     throw new Error("Issue not found");
@@ -192,7 +229,10 @@ const updateIssueIntoDB = async (
 };
 
 const deleteIssueIntoDB = async (id: number): Promise<void> => {
-  const result = await pool.query(`DELETE FROM issues WHERE id = $1 RETURNING id`, [id]);
+  const result = await pool.query(
+    `DELETE FROM issues WHERE id = $1 RETURNING id`,
+    [id],
+  );
 
   if (result.rows.length === 0) {
     throw new Error("Issue not found");

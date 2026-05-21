@@ -1,5 +1,23 @@
-export type ISSUE_TYPE = "bug" | "feature_request";
-export type ISSUE_STATUS = "open" | "in_progress" | "resolved";
+export const SORT_OPTION = {
+  newest: "newest",
+  oldest: "oldest",
+} as const;
+
+export type SORT_OPTION = (typeof SORT_OPTION)[keyof typeof SORT_OPTION];
+
+export const ISSUE_TYPE = {
+  bug: "bug",
+  feature_request: "feature_request",
+} as const;
+
+export const ISSUE_STATUS = {
+  open: "open",
+  in_progress: "in_progress",
+  resolved: "resolved",
+} as const;
+
+export type ISSUE_TYPE = (typeof ISSUE_TYPE)[keyof typeof ISSUE_TYPE];
+export type ISSUE_STATUS = (typeof ISSUE_STATUS)[keyof typeof ISSUE_STATUS];
 
 export interface IIssue {
   id: number;
@@ -13,7 +31,7 @@ export interface IIssue {
 }
 
 export interface IGetAllIssuesQuery {
-  sort?: "newest" | "oldest" | undefined;
+  sort?: SORT_OPTION | undefined;
   type?: ISSUE_TYPE | undefined;
   status?: ISSUE_STATUS | undefined;
 }
