@@ -52,3 +52,14 @@ export interface ICreateIssuePayload {
 export interface IIssueWithReporter extends Omit<IIssue, "reporter_id"> {
   reporter: IReporterInfo;
 }
+
+export interface IUpdateIssuePayload {
+  title?: string;
+  description?: string;
+  type?: ISSUE_TYPE;
+}
+
+export interface IUserInfo {
+  id: number;
+  role: string;
+}

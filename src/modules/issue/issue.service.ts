@@ -1,4 +1,5 @@
 import { pool } from "../../db/index.js";
+import { USER_ROLE } from "../../types/index.js";
 import {
   ISSUE_STATUS,
   ISSUE_TYPE,
@@ -8,9 +9,13 @@ import {
   type IIssue,
   type IIssueWithReporter,
   type IReporterInfo,
+  type IUpdateIssuePayload,
+  type IUserInfo,
 } from "./issue.interface.js";
 
-const createIssueIntoDB = async (payload: ICreateIssuePayload) => {
+const createIssueIntoDB = async (
+  payload: ICreateIssuePayload,
+): Promise<IIssue> => {
   const { title, description, type, reporter_id } = payload;
 
   const result = await pool.query(
@@ -23,7 +28,9 @@ const createIssueIntoDB = async (payload: ICreateIssuePayload) => {
   return result.rows[0];
 };
 
-const getAllIssuesFromDB = async (query: IGetAllIssuesQuery) => {
+const getAllIssuesFromDB = async (
+  query: IGetAllIssuesQuery,
+): Promise<IIssueWithReporter[]> => {
   const { sort, type, status } = query;
 
   if (
@@ -154,23 +161,11 @@ const getSingleIssueFromDB = async (
   };
 };
 
-interface IUpdateIssuePayload {
-  title?: string;
-  description?: string;
-  type?: ISSUE_TYPE;
-}
-
-interface IUserInfo {
-  id: number;
-  role: string;
-}
-
 const updateIssueIntoDB = async (
   id: number,
   payload: IUpdateIssuePayload,
   user: IUserInfo,
 ): Promise<IIssue> => {
-  // Fetch the issue first
   const issueResult = await pool.query(`SELECT * FROM issues WHERE id = $1`, [
     id,
   ]);
@@ -181,8 +176,7 @@ const updateIssueIntoDB = async (
 
   const issue = issueResult.rows[0];
 
-  // Permission check: maintainer can update any, contributor can only update own if status is open
-  if (user.role === "contributor") {
+  if (user.role === USER_ROLE.contributor) {
     if (issue.reporter_id !== user.id) {
       throw new Error("You can only update your own issues");
     }
@@ -191,34 +185,16 @@ const updateIssueIntoDB = async (
     }
   }
 
-  // Build dynamic update query
-  const updates: string[] = [];
-  const values: any[] = [];
-  let paramIndex = 1;
-
-  if (payload.title) {
-    updates.push(`title = $${paramIndex++}`);
-    values.push(payload.title);
-  }
-  if (payload.description) {
-    updates.push(`description = $${paramIndex++}`);
-    values.push(payload.description);
-  }
-  if (payload.type) {
-    updates.push(`type = $${paramIndex++}`);
-    values.push(payload.type);
-  }
-
-  if (updates.length === 0) {
-    throw new Error("No fields to update");
-  }
-
-  updates.push(`updated_at = NOW()`);
-  values.push(id);
-
   const result = await pool.query(
-    `UPDATE issues SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
-    values,
+    `UPDATE issues 
+     SET 
+       title = COALESCE($1, title),
+       description = COALESCE($2, description),
+       type = COALESCE($3, type),
+       updated_at = NOW() 
+     WHERE id = $4 
+     RETURNING *`,
+    [payload.title ?? null, payload.description ?? null, payload.type ?? null, id],
   );
 
   return result.rows[0];
