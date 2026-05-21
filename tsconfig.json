@@ -6,9 +6,10 @@
     "outDir": "./dist",
 
     // Environment Settings
-    "module": "nodenext",
-    "target": "es2022",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["ESNext"],
+    "moduleResolution": "bundler",
     "types": ["node"],
 
     // Other Outputs
@@ -38,5 +39,5 @@
     "skipLibCheck": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": []
 }
